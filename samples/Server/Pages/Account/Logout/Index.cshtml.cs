@@ -13,7 +13,7 @@ namespace OidcAndApiServer.Pages.Logout;
 [AllowAnonymous]
 public class Index(IIdentityServerInteractionService interaction, IEventService events) : PageModel
 {
-    [BindProperty] 
+    [BindProperty]
     public string LogoutId { get; set; }
 
     public async Task<IActionResult> OnGet(string logoutId)
@@ -29,14 +29,14 @@ public class Index(IIdentityServerInteractionService interaction, IEventService 
         }
         else
         {
-            var context = await interaction.GetLogoutContextAsync(LogoutId);
+            var context = await interaction.GetLogoutContextAsync(LogoutId, HttpContext.RequestAborted);
             if (context?.ShowSignoutPrompt == false)
             {
                 // it's safe to automatically sign-out
                 showLogoutPrompt = false;
             }
         }
-            
+
         if (!showLogoutPrompt)
         {
             // if the request for logout was properly authenticated from IdentityServer, then
@@ -54,20 +54,20 @@ public class Index(IIdentityServerInteractionService interaction, IEventService 
             // if there's no current logout context, we need to create one
             // this captures necessary info from the current logged in user
             // this can still return null if there is no context needed
-            LogoutId ??= await interaction.CreateLogoutContextAsync();
-                
+            LogoutId ??= await interaction.CreateLogoutContextAsync(HttpContext.RequestAborted);
+
             // delete local authentication cookie
             await HttpContext.SignOutAsync();
 
             // raise the logout event
-            await events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
+            await events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()), HttpContext.RequestAborted);
 
             // see if we need to trigger federated logout
             var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
 
             // if it's a local login we can ignore this workflow
-            if (idp != null && 
-                idp != Duende.IdentityServer.IdentityServerConstants.LocalIdentityProvider && 
+            if (idp != null &&
+                idp != Duende.IdentityServer.IdentityServerConstants.LocalIdentityProvider &&
                 await HttpContext.GetSchemeSupportsSignOutAsync(idp))
             {
                 // build a return URL so the upstream provider will redirect back
