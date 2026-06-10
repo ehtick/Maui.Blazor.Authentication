@@ -37,7 +37,7 @@ namespace OidcAndApiServer.Pages.ServerSideSessions
                     DisplayName = Filter,
                     SessionId = Filter,
                     SubjectId = Filter,
-                });
+                }, HttpContext.RequestAborted);
             }
         }
 
@@ -46,9 +46,10 @@ namespace OidcAndApiServer.Pages.ServerSideSessions
 
         public async Task<IActionResult> OnPost()
         {
-            await _sessionManagementService.RemoveSessionsAsync(new RemoveSessionsContext { 
+            await _sessionManagementService.RemoveSessionsAsync(new RemoveSessionsContext
+            {
                 SessionId = SessionId,
-            });
+            }, HttpContext.RequestAborted);
             return RedirectToPage("/ServerSideSessions/Index", new { Token, Filter, Prev });
         }
     }

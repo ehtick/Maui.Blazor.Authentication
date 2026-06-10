@@ -1,13 +1,13 @@
-using System.Security.Claims;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 
 namespace OidcAndApiServer.Pages.ExternalLogin;
 
@@ -69,7 +69,7 @@ public class Callback(
         var additionalLocalClaims = new List<Claim>();
         var localSignInProps = new AuthenticationProperties();
         CaptureExternalLoginContext(result, additionalLocalClaims, localSignInProps);
-            
+
         // issue authentication cookie for user
         var isuser = new IdentityServerUser(user.SubjectId)
         {
@@ -87,8 +87,8 @@ public class Callback(
         var returnUrl = result.Properties.Items["returnUrl"] ?? "~/";
 
         // check if external login is in the context of an OIDC request
-        var context = await interaction.GetAuthorizationContextAsync(returnUrl);
-        await events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.SubjectId, user.Username, true, context?.Client.ClientId));
+        var context = await interaction.GetAuthorizationContextAsync(returnUrl, HttpContext.RequestAborted);
+        await events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.SubjectId, user.Username, true, context?.Client.ClientId), HttpContext.RequestAborted);
 
         if (context != null && context.IsNativeClient())
         {

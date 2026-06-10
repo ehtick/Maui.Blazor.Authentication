@@ -15,7 +15,7 @@ public class WebBrowserAuthenticatorTest
 
         var sut = new WebBrowserAuthenticator(authenticatorMock.Object);
 
-        var result = await sut.InvokeAsync(new BrowserOptions("https://exemple.com", "https://exemple.com"));
+        var result = await sut.InvokeAsync(new BrowserOptions("https://exemple.com", "https://exemple.com"), TestContext.Current.CancellationToken);
 
         Assert.Equal(BrowserResultType.Success, result.ResultType);
     }
@@ -29,7 +29,7 @@ public class WebBrowserAuthenticatorTest
 
         var sut = new WebBrowserAuthenticator(authenticatorMock.Object);
 
-        var result = await sut.InvokeAsync(new BrowserOptions("https://exemple.com", "https://exemple.com"));
+        var result = await sut.InvokeAsync(new BrowserOptions("https://exemple.com", "https://exemple.com"), TestContext.Current.CancellationToken);
 
         Assert.Equal(BrowserResultType.UserCancel, result.ResultType);
     }
